@@ -50,12 +50,82 @@ namespace Quantum.Prototypes {
   #endif //;
   
   [System.SerializableAttribute()]
+  [Quantum.Prototypes.Prototype(typeof(Quantum.CardMatch))]
+  public unsafe partial class CardMatchPrototype : ComponentPrototype<Quantum.CardMatch> {
+    public Quantum.QEnum32<GamePhase> Phase;
+    public Int32 Round;
+    public Int32 TicksLeft;
+    partial void MaterializeUser(Frame frame, ref Quantum.CardMatch result, in PrototypeMaterializationContext context);
+    public override Boolean AddToEntity(FrameBase f, EntityRef entity, in PrototypeMaterializationContext context) {
+        Quantum.CardMatch component = default;
+        Materialize((Frame)f, ref component, in context);
+        return f.Set(entity, component) == SetResult.ComponentAdded;
+    }
+    public void Materialize(Frame frame, ref Quantum.CardMatch result, in PrototypeMaterializationContext context = default) {
+        result.Phase = this.Phase;
+        result.Round = this.Round;
+        result.TicksLeft = this.TicksLeft;
+        MaterializeUser(frame, ref result, in context);
+    }
+  }
+  [System.SerializableAttribute()]
+  [Quantum.Prototypes.Prototype(typeof(Quantum.CardPlayer))]
+  public unsafe partial class CardPlayerPrototype : ComponentPrototype<Quantum.CardPlayer> {
+    [HideInInspector()]
+    [ArrayLengthAttribute(3)]
+    public Quantum.QEnum32<CardType>[] Hand = new Quantum.QEnum32<CardType>[3];
+    [HideInInspector()]
+    [ArrayLengthAttribute(5)]
+    public Quantum.QEnum32<CardType>[] Deck = new Quantum.QEnum32<CardType>[5];
+    [HideInInspector()]
+    public Int32 DeckIndex;
+    [HideInInspector()]
+    public Int32 DeckCount;
+    public Quantum.QEnum32<CardType> PlayedCard;
+    partial void MaterializeUser(Frame frame, ref Quantum.CardPlayer result, in PrototypeMaterializationContext context);
+    public override Boolean AddToEntity(FrameBase f, EntityRef entity, in PrototypeMaterializationContext context) {
+        Quantum.CardPlayer component = default;
+        Materialize((Frame)f, ref component, in context);
+        return f.Set(entity, component) == SetResult.ComponentAdded;
+    }
+    public void Materialize(Frame frame, ref Quantum.CardPlayer result, in PrototypeMaterializationContext context = default) {
+        for (int i = 0, count = PrototypeValidator.CheckLength(Hand, 3, in context); i < count; ++i) {
+          *result.Hand.GetPointer(i) = this.Hand[i];
+        }
+        for (int i = 0, count = PrototypeValidator.CheckLength(Deck, 5, in context); i < count; ++i) {
+          *result.Deck.GetPointer(i) = this.Deck[i];
+        }
+        result.DeckIndex = this.DeckIndex;
+        result.DeckCount = this.DeckCount;
+        result.PlayedCard = this.PlayedCard;
+        MaterializeUser(frame, ref result, in context);
+    }
+  }
+  [System.SerializableAttribute()]
   [Quantum.Prototypes.Prototype(typeof(Quantum.Input))]
   public unsafe partial class InputPrototype : StructPrototype {
     [HideInInspector()]
     public Int32 _empty_prototype_dummy_field_;
     partial void MaterializeUser(Frame frame, ref Quantum.Input result, in PrototypeMaterializationContext context);
     public void Materialize(Frame frame, ref Quantum.Input result, in PrototypeMaterializationContext context = default) {
+        MaterializeUser(frame, ref result, in context);
+    }
+  }
+  [System.SerializableAttribute()]
+  [Quantum.Prototypes.Prototype(typeof(Quantum.PlayerData))]
+  public unsafe partial class PlayerDataPrototype : ComponentPrototype<Quantum.PlayerData> {
+    public AssetRef<PlayerStats> Stats;
+    [HideInInspector()]
+    public Int32 Lives;
+    partial void MaterializeUser(Frame frame, ref Quantum.PlayerData result, in PrototypeMaterializationContext context);
+    public override Boolean AddToEntity(FrameBase f, EntityRef entity, in PrototypeMaterializationContext context) {
+        Quantum.PlayerData component = default;
+        Materialize((Frame)f, ref component, in context);
+        return f.Set(entity, component) == SetResult.ComponentAdded;
+    }
+    public void Materialize(Frame frame, ref Quantum.PlayerData result, in PrototypeMaterializationContext context = default) {
+        result.Stats = this.Stats;
+        result.Lives = this.Lives;
         MaterializeUser(frame, ref result, in context);
     }
   }
@@ -71,45 +141,6 @@ namespace Quantum.Prototypes {
     }
     public void Materialize(Frame frame, ref Quantum.PlayerLink result, in PrototypeMaterializationContext context = default) {
         result.Player = this.Player;
-        MaterializeUser(frame, ref result, in context);
-    }
-  }
-  [System.SerializableAttribute()]
-  [Quantum.Prototypes.Prototype(typeof(Quantum.PlayerData))]
-  public unsafe partial class PlayerDataPrototype : ComponentPrototype<Quantum.PlayerData> {
-    public AssetRef<PlayerStats> Stats;
-    [HideInInspector()]
-    public Int32 Lives;
-    [HideInInspector()]
-    [ArrayLengthAttribute(3)]
-    public Quantum.QEnum32<CardType>[] Hand = new Quantum.QEnum32<CardType>[3];
-    [HideInInspector()]
-    [ArrayLengthAttribute(5)]
-    public Quantum.QEnum32<CardType>[] Deck = new Quantum.QEnum32<CardType>[5];
-    [HideInInspector()]
-    public Int32 DeckIndex;
-    [HideInInspector()]
-    public Int32 DeckCount;
-    [HideInInspector()]
-    public Quantum.QEnum32<CardType> PlayedCard;
-    partial void MaterializeUser(Frame frame, ref Quantum.PlayerData result, in PrototypeMaterializationContext context);
-    public override Boolean AddToEntity(FrameBase f, EntityRef entity, in PrototypeMaterializationContext context) {
-        Quantum.PlayerData component = default;
-        Materialize((Frame)f, ref component, in context);
-        return f.Set(entity, component) == SetResult.ComponentAdded;
-    }
-    public void Materialize(Frame frame, ref Quantum.PlayerData result, in PrototypeMaterializationContext context = default) {
-        result.Stats = this.Stats;
-        result.Lives = this.Lives;
-        for (int i = 0, count = PrototypeValidator.CheckLength(Hand, 3, in context); i < count; ++i) {
-          *result.Hand.GetPointer(i) = this.Hand[i];
-        }
-        for (int i = 0, count = PrototypeValidator.CheckLength(Deck, 5, in context); i < count; ++i) {
-          *result.Deck.GetPointer(i) = this.Deck[i];
-        }
-        result.DeckIndex = this.DeckIndex;
-        result.DeckCount = this.DeckCount;
-        result.PlayedCard = this.PlayedCard;
         MaterializeUser(frame, ref result, in context);
     }
   }

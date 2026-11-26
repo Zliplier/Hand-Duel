@@ -13,6 +13,8 @@ GameObject:
   - component: {fileID: 6620315070703054587}
   - component: {fileID: 6858675838961573146}
   - component: {fileID: 7587261315594332755}
+  - component: {fileID: 8666995202200288885}
+  - component: {fileID: 1917263046832845528}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -331,6 +333,19 @@ MonoBehaviour:
       Id:
         Value: 325120152560915038
     Lives: 0
+--- !u!114 &8666995202200288885
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7346222287860154064}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ee9bfb4ca687a374fbaf81ae95e97596, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Quantum.Unity::Quantum.QPrototypeCardPlayer
+  Prototype:
     Hand:
     - Value: 0
     - Value: 0
@@ -345,3 +360,18 @@ MonoBehaviour:
     DeckCount: 0
     PlayedCard:
       Value: 0
+--- !u!114 &1917263046832845528
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7346222287860154064}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b521cd56ecd84155bdcce5aa52deb72d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::QuantumUser.View.Scripts.CardLocalInput
+  slot0: {fileID: -4265027389521986954, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  slot1: {fileID: -2900012400397099747, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  slot2: {fileID: -1592734725062704955, guid: 052faaac586de48259a63d0c4782560b, type: 3}

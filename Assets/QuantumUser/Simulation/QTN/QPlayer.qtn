@@ -2,6 +2,8 @@ asset PlayerStats;
 
 enum CardType { None, Rock, Spork, Paper, Lizard, Scissors }  // order matters for Compare
 
+enum GamePhase { WaitingForPlayers, Picking, Reveal, GameOver }
+
 component PlayerLink {
     player_ref Player;
 }
@@ -10,9 +12,18 @@ component PlayerData {
     AssetRef<PlayerStats> Stats;
     
     [HideInInspector] Int32 Lives;
+}
+
+component CardPlayer {
     [HideInInspector] array<CardType>[3] Hand;
     [HideInInspector] array<CardType>[5] Deck;
     [HideInInspector] Int32 DeckIndex;
     [HideInInspector] Int32 DeckCount;
-    [HideInInspector] CardType PlayedCard;
+    CardType PlayedCard;
+}
+
+singleton component CardMatch {
+    GamePhase Phase;
+    Int32 Round;
+    Int32 TicksLeft;
 }

@@ -9,7 +9,7 @@
         {
             // Add or remove commands to the collection.
             // factories.Add(new NavMeshAgentTestSystem.RunTest());
-            factories.Add(new PlayCardCommand());
+            factories.Add(new DeterministicCommandPool<PlayCardCommand>());
         }
     }
 }

@@ -57,6 +57,12 @@ namespace Quantum {
     Lizard,
     Scissors,
   }
+  public enum GamePhase : int {
+    WaitingForPlayers,
+    Picking,
+    Reveal,
+    GameOver,
+  }
   [System.FlagsAttribute()]
   public enum InputButtons : int {
   }
@@ -615,14 +621,35 @@ namespace Quantum {
     }
   }
   [StructLayout(LayoutKind.Explicit)]
-  public unsafe partial struct PlayerData : Quantum.IComponent {
-    public const Int32 SIZE = 56;
-    public const Int32 ALIGNMENT = 8;
-    [FieldOffset(48)]
-    public AssetRef<PlayerStats> Stats;
-    [FieldOffset(44)]
-    [HideInInspector()]
-    public Int32 Lives;
+  public unsafe partial struct CardMatch : Quantum.IComponentSingleton {
+    public const Int32 SIZE = 12;
+    public const Int32 ALIGNMENT = 4;
+    [FieldOffset(0)]
+    public GamePhase Phase;
+    [FieldOffset(4)]
+    public Int32 Round;
+    [FieldOffset(8)]
+    public Int32 TicksLeft;
+    public override readonly Int32 GetHashCode() {
+      unchecked { 
+        var hash = 15923;
+        hash = hash * 31 + (Int32)Phase;
+        hash = hash * 31 + Round.GetHashCode();
+        hash = hash * 31 + TicksLeft.GetHashCode();
+        return hash;
+      }
+    }
+    public static void Serialize(void* ptr, FrameSerializer serializer) {
+        var p = (CardMatch*)ptr;
+        serializer.Stream.Serialize((Int32*)&p->Phase);
+        serializer.Stream.Serialize(&p->Round);
+        serializer.Stream.Serialize(&p->TicksLeft);
+    }
+  }
+  [StructLayout(LayoutKind.Explicit)]
+  public unsafe partial struct CardPlayer : Quantum.IComponent {
+    public const Int32 SIZE = 44;
+    public const Int32 ALIGNMENT = 4;
     [FieldOffset(20)]
     [HideInInspector()]
     [FramePrinter.FixedArrayAttribute(typeof(CardType), 3)]
@@ -638,7 +665,6 @@ namespace Quantum {
     [HideInInspector()]
     public Int32 DeckCount;
     [FieldOffset(32)]
-    [HideInInspector()]
     public CardType PlayedCard;
     public readonly FixedArray<CardType> Hand {
       get {
@@ -652,9 +678,7 @@ namespace Quantum {
     }
     public override readonly Int32 GetHashCode() {
       unchecked { 
-        var hash = 10271;
-        hash = hash * 31 + Stats.GetHashCode();
-        hash = hash * 31 + Lives.GetHashCode();
+        var hash = 19387;
         hash = hash * 31 + HashCodeUtils.GetArrayHashCode(Hand);
         hash = hash * 31 + HashCodeUtils.GetArrayHashCode(Deck);
         hash = hash * 31 + DeckIndex.GetHashCode();
@@ -664,12 +688,33 @@ namespace Quantum {
       }
     }
     public static void Serialize(void* ptr, FrameSerializer serializer) {
-        var p = (PlayerData*)ptr;
+        var p = (CardPlayer*)ptr;
         FixedArray.Serialize(p->Deck, serializer, Statics.SerializeCardType);
         FixedArray.Serialize(p->Hand, serializer, Statics.SerializeCardType);
         serializer.Stream.Serialize((Int32*)&p->PlayedCard);
         serializer.Stream.Serialize(&p->DeckCount);
         serializer.Stream.Serialize(&p->DeckIndex);
+    }
+  }
+  [StructLayout(LayoutKind.Explicit)]
+  public unsafe partial struct PlayerData : Quantum.IComponent {
+    public const Int32 SIZE = 16;
+    public const Int32 ALIGNMENT = 8;
+    [FieldOffset(8)]
+    public AssetRef<PlayerStats> Stats;
+    [FieldOffset(0)]
+    [HideInInspector()]
+    public Int32 Lives;
+    public override readonly Int32 GetHashCode() {
+      unchecked { 
+        var hash = 10271;
+        hash = hash * 31 + Stats.GetHashCode();
+        hash = hash * 31 + Lives.GetHashCode();
+        return hash;
+      }
+    }
+    public static void Serialize(void* ptr, FrameSerializer serializer) {
+        var p = (PlayerData*)ptr;
         serializer.Stream.Serialize(&p->Lives);
         AssetRef.Serialize(&p->Stats, serializer);
     }
@@ -708,6 +753,10 @@ namespace Quantum {
       Initialize(this, this.SimulationConfig.Entities, 256);
       _ComponentSignalsOnAdded = new ComponentReactiveCallbackInvoker[ComponentTypeId.Type.Length];
       _ComponentSignalsOnRemoved = new ComponentReactiveCallbackInvoker[ComponentTypeId.Type.Length];
+      BuildSignalsArrayOnComponentAdded<Quantum.CardMatch>();
+      BuildSignalsArrayOnComponentRemoved<Quantum.CardMatch>();
+      BuildSignalsArrayOnComponentAdded<Quantum.CardPlayer>();
+      BuildSignalsArrayOnComponentRemoved<Quantum.CardPlayer>();
       BuildSignalsArrayOnComponentAdded<CharacterController2D>();
       BuildSignalsArrayOnComponentRemoved<CharacterController2D>();
       BuildSignalsArrayOnComponentAdded<CharacterController3D>();
@@ -788,6 +837,8 @@ namespace Quantum {
       typeRegistry.Register(typeof(Quantum.BitSet6), Quantum.BitSet6.SIZE);
       typeRegistry.Register(typeof(Button), Button.SIZE);
       typeRegistry.Register(typeof(CallbackFlags), 4);
+      typeRegistry.Register(typeof(Quantum.CardMatch), Quantum.CardMatch.SIZE);
+      typeRegistry.Register(typeof(Quantum.CardPlayer), Quantum.CardPlayer.SIZE);
       typeRegistry.Register(typeof(Quantum.CardType), 4);
       typeRegistry.Register(typeof(CharacterController2D), CharacterController2D.SIZE);
       typeRegistry.Register(typeof(CharacterController3D), CharacterController3D.SIZE);
@@ -809,6 +860,7 @@ namespace Quantum {
       typeRegistry.Register(typeof(FPVector3), FPVector3.SIZE);
       typeRegistry.Register(typeof(FrameMetaData), FrameMetaData.SIZE);
       typeRegistry.Register(typeof(FrameTimer), FrameTimer.SIZE);
+      typeRegistry.Register(typeof(Quantum.GamePhase), 4);
       typeRegistry.Register(typeof(HingeJoint), HingeJoint.SIZE);
       typeRegistry.Register(typeof(HingeJoint3D), HingeJoint3D.SIZE);
       typeRegistry.Register(typeof(Hit), Hit.SIZE);
@@ -864,8 +916,10 @@ namespace Quantum {
       typeRegistry.Register(typeof(Quantum._globals_), Quantum._globals_.SIZE);
     }
     static partial void InitComponentTypeIdGen() {
-      ComponentTypeId.Reset(ComponentTypeId.BuiltInComponentCount + 2)
+      ComponentTypeId.Reset(ComponentTypeId.BuiltInComponentCount + 4)
         .AddBuiltInComponents()
+        .Add<Quantum.CardMatch>(Quantum.CardMatch.Serialize, null, null, ComponentFlags.Singleton)
+        .Add<Quantum.CardPlayer>(Quantum.CardPlayer.Serialize, null, null, ComponentFlags.None)
         .Add<Quantum.PlayerData>(Quantum.PlayerData.Serialize, null, null, ComponentFlags.None)
         .Add<Quantum.PlayerLink>(Quantum.PlayerLink.Serialize, null, null, ComponentFlags.None)
         .Finish();
@@ -875,6 +929,7 @@ namespace Quantum {
       FramePrinter.EnsureNotStripped();
       FramePrinter.EnsurePrimitiveNotStripped<CallbackFlags>();
       FramePrinter.EnsurePrimitiveNotStripped<Quantum.CardType>();
+      FramePrinter.EnsurePrimitiveNotStripped<Quantum.GamePhase>();
       FramePrinter.EnsurePrimitiveNotStripped<Quantum.InputButtons>();
       FramePrinter.EnsurePrimitiveNotStripped<QueryOptions>();
     }
