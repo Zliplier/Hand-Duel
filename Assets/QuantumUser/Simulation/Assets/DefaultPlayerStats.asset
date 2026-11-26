@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6cf3dda110d84c21b2c4233438efdc99, type: 3}
-  m_Name: DefaultPlayerSpec
+  m_Name: DefaultPlayerStats
   m_EditorClassIdentifier: Quantum.Simulation::Quantum.AssetType.PlayerSpec
   Identifier:
-    Path: QuantumUser/Simulation/Assets/DefaultPlayerSpec
+    Path: QuantumUser/Simulation/Assets/DefaultPlayerStats
     Guid:
       Value: 325120152560915038
   Lives: 3

@@ -5,7 +5,7 @@ namespace Quantum
     using Photon.Deterministic;
 
     [Preserve]
-    public unsafe class PlayerStatsSystem : SystemMainThreadFilter<PlayerStatsSystem.Filter>, ISignalOnComponentAdded<PlayerStats>
+    public unsafe class PlayerStatsSystem : SystemMainThreadFilter<PlayerStatsSystem.Filter>, ISignalOnComponentAdded<PlayerData>
     {
         public override void Update(Frame frame, ref Filter filter)
         {
@@ -15,13 +15,13 @@ namespace Quantum
         public struct Filter
         {
             public EntityRef Entity;
-            public PlayerStats* Stats;
+            public PlayerData* Data;
         }
 
-        public void OnAdded(Frame f, EntityRef entity, PlayerStats* component)
+        public void OnAdded(Frame f, EntityRef entity, PlayerData* component)
         {
-            var spec = f.FindAsset(component->Spec);
-            component->Lives = spec.Lives;
+            var stats = f.FindAsset(component->Stats);
+            component->Lives = stats.Lives;
         }
     }
 }

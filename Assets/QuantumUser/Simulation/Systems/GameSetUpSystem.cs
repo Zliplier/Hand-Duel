@@ -16,7 +16,7 @@ namespace Quantum
             {
                 Player = player,
             };
-            var stat = new PlayerStats();
+            var stat = new PlayerData();
             
             f.Add(entity, link);
             f.Add(entity,stat);

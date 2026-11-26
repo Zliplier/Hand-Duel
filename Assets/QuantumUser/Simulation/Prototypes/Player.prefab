@@ -327,7 +327,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Quantum.Unity::Quantum.QPrototypePlayerStats
   Prototype:
-    Spec:
+    Stats:
       Id:
         Value: 325120152560915038
     Lives: 0
+    Hand:
+    - Value: 0
+    - Value: 0
+    - Value: 0
+    Deck:
+    - Value: 0
+    - Value: 0
+    - Value: 0
+    - Value: 0
+    - Value: 0
+    DeckIndex: 0
+    DeckCount: 0
+    PlayedCard:
+      Value: 0

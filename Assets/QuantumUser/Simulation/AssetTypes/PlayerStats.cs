@@ -1,9 +1,9 @@
 ﻿using System;
 using Photon.Deterministic;
 
-namespace Quantum.AssetType
+namespace Quantum
 {
-    public class PlayerSpec : AssetObject
+    public class PlayerStats : AssetObject
     {
         public Int32 Lives = 3;
     }
